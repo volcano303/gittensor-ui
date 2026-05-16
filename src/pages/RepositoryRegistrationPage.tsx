@@ -16,18 +16,11 @@ import { isRepoTracked } from '../api';
 import { useLinkBehavior } from '../components/common/linkBehavior';
 import { Page } from '../components/layout';
 import { SEO } from '../components';
+import { extractRepoFullName, isGithubRepoUrl } from '../utils';
 
 type VerifyResult =
   | { tracked: true }
   | { tracked: false; reason: 'not-installed' | 'transient' | 'bad-url' };
-
-const extractRepoFullName = (url: string): string | null => {
-  const match = url
-    .trim()
-    .match(/^https?:\/\/github\.com\/([^/]+)\/([^/]+?)\/?$/i);
-  if (!match) return null;
-  return `${match[1]}/${match[2]}`;
-};
 
 const verifyRepoTracked = async (repoUrl: string): Promise<VerifyResult> => {
   const fullName = extractRepoFullName(repoUrl);
@@ -59,7 +52,7 @@ const validators: Record<
   repoUrl: (value) => {
     const trimmed = String(value).trim();
     if (!trimmed) return 'Repository URL is required.';
-    if (!/^https?:\/\/github\.com\/[^/]+\/[^/]+\/?$/.test(trimmed)) {
+    if (!isGithubRepoUrl(trimmed)) {
       return 'Use the full GitHub URL, e.g. https://github.com/owner/repo';
     }
     return undefined;
